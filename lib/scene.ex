@@ -5,16 +5,14 @@ defmodule Story do
         quote do
             import unquote(__MODULE__)
             Module.register_attribute(__MODULE__, :scenes, accumulate: true, persist: true)
-            Module.register_attribute(__MODULE__, :spawn_point, [persist: true])
 
-            @after_compile __MODULE__
-            defmacro __after_compile__(_env, _) do
-                scenes = @scenes
-                quote do
-                    IO.puts("Running in #{inspect(__MODULE__)}")
-                    def scenes(), do: unquote(scenes)
-                end
-            end
+            @before_compile unquote(__MODULE__)
+        end
+    end
+
+    defmacro __before_compile__(_env) do
+        quote do
+            def scenes(), do: @scenes
         end
     end
 
