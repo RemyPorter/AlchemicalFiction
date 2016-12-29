@@ -1,6 +1,8 @@
 # Mud
 
-**TODO: Add description**
+This is incredibly incomplete and can't be run as an application, *yet*. I'm getting there.
+
+Mud is a flexible interactive fiction engine, designed to be easily extensible, based around a DSL. Eventually, users will be able to design games with a very simple and focused domain-specific-language that retains a great deal of flexibliity (and can be easily extended). Think Twine, but more powerful.
 
 ## Installation
 
