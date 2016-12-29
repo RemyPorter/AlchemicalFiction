@@ -1,10 +1,9 @@
 defmodule GameMacros do
     use Story
-
     scene ASimpleScene, "There's nothing here" do
         feature :door, :simple, "A simple exit" do
             action :examine do
-                {var!(feature_state), {:see, "This simple exit is unmarked."}}
+                reply({:see, "This simple exit is unmarked."})
             end
             action :use do
                 #get actor, feature state, actor state
@@ -17,5 +16,5 @@ defmodule GameMacros do
         end
     end
 
-    spawn_point(ASimpleScene)
+    actor_spawn(ASimpleScene)
 end

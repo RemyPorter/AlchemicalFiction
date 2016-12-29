@@ -26,6 +26,18 @@ defmodule Features do
         end
     end
 
+    defmacro set(key, value) do
+        quote do
+            var!(feature_state) = Map.put(var!(feature_state), key, value)
+        end
+    end
+
+    defmacro reply(message) do
+        quote do
+            var!(action_reply) = unquote(message)
+        end
+    end
+
     defmacro action(verb, do: block) do
         quote do
             actions = Map.get(@features, @current_feature)
@@ -42,11 +54,13 @@ defmodule Features do
             def handle_call({unquote(type), unquote(id), unquote(verb)}, actor, state) do
                 var!(feature_state) = Map.get(state, 
                     {:features, unquote(type), unquote(id)})
-                var!(actor_state) = nil #TODO: Actor.get_state(actor)
                 var!(actor) = actor
-                {feature_new, reply_state} = unquote(block)
-                new_state = Map.put(state, {:features, unquote(type), unquote(id)}, feature_new)
-                {:reply, reply_state, new_state}
+                var!(action_reply) = nil
+                unquote(block)
+                new_state = Map.put(state, 
+                    {:features, unquote(type), unquote(id)}, 
+                    var!(feature_state))
+                {:reply, var!(action_reply), new_state}
             end
         end
     end
