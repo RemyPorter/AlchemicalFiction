@@ -1,6 +1,8 @@
 defmodule GameMacros do
     use Story
+    use BasicElements
     scene ASimpleScene, "There's nothing here" do
+        choice :reflex, "You try to leave.", ASimpleScene
         feature :door, :simple, "A simple exit" do
             action :examine do
                 reply({:see, "This simple exit is unmarked."})
