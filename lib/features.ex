@@ -2,46 +2,51 @@ defmodule Features do
     defmacro __using__(_opts) do
         quote do
             import unquote(__MODULE__)
+            Module.register_attribute(__MODULE__, :features, accumulate: false)
+            @features %{}
+            @before_compile {unquote(__MODULE__), :__before_feature__}
         end
     end
 
-    defmacro feature_type(type) do
+    defmacro __before_feature__(_env) do
         quote do
-            if ! Map.has_key?(@features, unquote(type)) do
-                @features Map.put(@features, unquote(type), [])
+            def features(), do: @features
+        end
+    end
+
+    defmacro feature(type, id, caption, do: block) do
+        quote do
+            Module.register_attribute(__MODULE__, :current_feature, [])
+            @current_feature {unquote(type), unquote(id)}
+            @features Map.put(@features, @current_feature, [])
+            def feature({unquote(type), unquote(id)}) do
+                unquote(caption)
             end
+            unquote(block)
         end
     end
 
-    defmacro add_feature(type, details) do
+    defmacro action(verb, do: block) do
         quote do
-            l = Map.get(@features, unquote(type))
-            @features Map.put(@features, unquote(type), [unquote(details) | l])
+            actions = Map.get(@features, @current_feature)
+            {type, id} = @current_feature
+            @features Map.put(@features, @current_feature, [
+                {type, id, unquote(verb)} | actions])
+            IO.puts("#{inspect(@current_feature)}, #{unquote(verb)}")
+            make_action(type, id, unquote(verb), do: unquote(block))
         end
     end
 
-    #a feature description must consist of:
-    # {symbol, title, description, activation_behavior}
-    # activations will always have the actor and the state as an input
-    # and should return the reply and new state
-
-    defmacro feature_activation(feature, item, options, do: block) do
+    defmacro make_action(type, id, verb, do: block) do
         quote do
-            defp unquote(:"act_#{feature}_#{item}")(actor, state) do
-                opts = unquote(options)
-                var!(state) = state
-                unquote(block)
-            end
-        end
-    end
-
-    defmacro render_feature(type, feature) do
-        quote bind_quoted: [type: type,feature: feature] do
-            for {msg, _, _, activation} <- feature do
-                def handle_call({type, msg}, actor, state) do
-                    {reply, new_state} = unquote(activation)(actor, state)
-                    {:reply, reply, new_state}
-                end
+            def handle_call({unquote(type), unquote(id), unquote(verb)}, actor, state) do
+                var!(feature_state) = Map.get(state, 
+                    {:features, unquote(type), unquote(id)})
+                var!(actor_state) = nil #TODO: Actor.get_state(actor)
+                var!(actor) = actor
+                {feature_new, reply_state} = unquote(block)
+                new_state = Map.put(state, {:features, unquote(type), unquote(id)}, feature_new)
+                {:reply, reply_state, new_state}
             end
         end
     end

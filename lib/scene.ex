@@ -1,6 +1,4 @@
 defmodule Story do
-    use Features
-
     defmacro __using__(_opts) do
         quote do
             import unquote(__MODULE__)
@@ -22,20 +20,6 @@ defmodule Story do
         end
     end
 
-    defmacro state(key) do
-        quote do
-            Map.get(var!(state), unquote(key))
-        end
-    end
-
-    defmacro state(key, value) do
-        quote do
-            var!(state) = Map.put(var!(state), 
-                unquote(key), 
-                unquote(value))
-        end
-    end
-
     defmacro scene(title, description) do
         quote do
             scene unquote(title), unquote(description) do
@@ -49,30 +33,33 @@ defmodule Story do
             @scenes unquote(title)
             defmodule unquote(title) do
                 use GenServer
+                use Features
 
-                Module.register_attribute(__MODULE__, :features, [])
-                @features %{}
+                unquote(block)
 
+                #Module.register_attribute(__MODULE__, :features, [])
+                #@features %{}
+#
                 def start_link() do
-                    GenServer.start_link({:global, __MODULE__}, nil, [])
+                    GenServer.start_link(__MODULE__, nil, [])
                 end
-
+#
                 def init(nil) do
                     {:ok, %{}}
                 end
-                
-                unquote(block)
-
-                def handle_call(:details, _from, state) do
-                    {:reply, {
-                        unquote(title), unquote(description),
-                        state
-                    }}
-                end
-
-                for type <- Map.keys(@features) do
-                    render_feature(type, Map.get(@features, type))
-                end
+                #
+                #unquote(block)
+#
+                #def handle_call(:details, _from, state) do
+                #    {:reply, {
+                #        unquote(title), unquote(description),
+                #        state
+                #    }}
+                #end
+#
+                #for type <- Map.keys(@features) do
+                #    render_feature(type, Map.get(@features, type))
+                #end
             end
         end
     end   
