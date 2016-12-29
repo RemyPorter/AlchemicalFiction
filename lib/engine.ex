@@ -7,13 +7,13 @@ defmodule GameSuper do
 
     def init(modules) do
         children = [
-            worker(RoomSuper, [modules], []),
+            worker(SceneSuper, [modules], []),
             worker(GameEngine, [modules], [])
         ]
         supervise(children, strategy: :one_for_one)
     end
 end
-defmodule RoomSuper do
+defmodule SceneSuper do
     use Supervisor
 
     def start_link([], rooms) do
