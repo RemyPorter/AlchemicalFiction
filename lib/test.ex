@@ -1,6 +1,9 @@
 defmodule GameMacros do
     use Story
     use BasicElements
+
+    story_title "A really boring tale"
+    
     scene ASimpleScene, "There's nothing here" do
         choice :reflex, "You try to leave.", ASimpleScene
         feature :door, :simple, "A simple exit" do

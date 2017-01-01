@@ -3,6 +3,7 @@ defmodule Story do
         quote do
             import unquote(__MODULE__)
             Module.register_attribute(__MODULE__, :scenes, accumulate: true, persist: true)
+            Module.register_attribute(__MODULE__, :title, [])
             @before_compile unquote(__MODULE__)
         end
     end
@@ -12,6 +13,15 @@ defmodule Story do
             def scenes() do
                 @scenes |> Enum.map(fn(mod) -> Module.concat(__MODULE__, mod) end)
             end
+            def title() do
+                @title
+            end
+        end
+    end
+
+    defmacro story_title(title) do
+        quote do
+            @title unquote(title)
         end
     end
 
@@ -38,11 +48,13 @@ defmodule Story do
 
                 unquote(block)
 
-                def start_link() do
-                    GenServer.start_link(__MODULE__, nil, [])
+                def start_link(root) do
+                    name = {:via, Registry, {Module.concat(Registry, root), __MODULE__}}
+                    IO.puts("#{inspect(name)}")
+                    GenServer.start_link(__MODULE__, [], [name: name])
                 end
 
-                def init(nil) do
+                def init([]) do
                     {:ok, %{}}
                 end
 

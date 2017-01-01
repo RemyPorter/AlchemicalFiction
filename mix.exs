@@ -27,6 +27,6 @@ defmodule Mud.Mixfile do
   #
   # Type "mix help deps" for more examples and options
   defp deps do
-    []
+    [{:registry, git: "https://github.com/elixir-lang/registry"}]
   end
 end
