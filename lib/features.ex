@@ -26,9 +26,16 @@ defmodule Features do
         end
     end
 
-    defmacro set(key, value) do
+    defmacro set_state(key, value) do
         quote do
-            var!(feature_state) = Map.put(var!(feature_state), key, value)
+            var!(feature_state) = Map.put(var!(feature_state), 
+                unquote(key), unquote(value))
+        end
+    end
+
+    defmacro get_state(key) do
+        quote do
+            Map.get(var!(feature_state), unquote(key))
         end
     end
 
@@ -38,30 +45,37 @@ defmodule Features do
         end
     end
 
-    defmacro action(verb, do: block) do
+    defmacro register_action(verb) do
         quote do
             actions = Map.get(@features, @current_feature)
             {type, id} = @current_feature
             @features Map.put(@features, @current_feature, [
                 {type, id, unquote(verb)} | actions])
-            IO.puts("#{inspect(@current_feature)}, #{unquote(verb)}")
-            make_action(type, id, unquote(verb), do: unquote(block))
+            {type, id}
         end
     end
 
-    defmacro make_action(type, id, verb, do: block) do
+    defmacro action(verb, do: block) do
         quote do
-            def handle_call({unquote(type), unquote(id), unquote(verb)}, actor, state) do
-                var!(feature_state) = Map.get(state, 
-                    {:features, unquote(type), unquote(id)})
-                var!(actor) = actor
-                var!(action_reply) = nil
+            v = unquote(verb)
+            {type, id} = register_action(v)
+            build_action(type, id, v) do
                 unquote(block)
-                new_state = Map.put(state, 
-                    {:features, unquote(type), unquote(id)}, 
-                    var!(feature_state))
-                {:reply, var!(action_reply), new_state}
             end
+        end
+    end
+
+    defmacro build_action(type, id, verb, do: block) do
+        quote do
+            def handle_call(
+                {t, i, v} = {unquote(type), unquote(id), unquote(verb)},
+                actor, state) do
+                    var!(feature_state) = Map.get(state, {:features,t,i})
+                    var!(action_reply) = nil
+                    unquote(block)
+                    new_state = Map.put(state,{:features,t,i},var!(feature_state))
+                    {:reply, var!(action_reply), new_state}
+                end
         end
     end
 end
