@@ -61,7 +61,7 @@ defmodule MacroTests do
                 end
             end
         end
-        #{:reply, {:move, Test}, _} = Test.handle_call({:door, :N, :use}, self, %{})
-        #{:reply, {:see, "It's red."}, _} = Test.handle_call({:door, :N, :examine}, self, %{})
+        {:reply, {:move, Test}, _} = Test.handle_call({:door, :N, :use}, self, %{})
+        {:reply, {:see, "It's red."}, _} = Test.handle_call({:door, :N, :examine}, self, %{})
     end
 end
