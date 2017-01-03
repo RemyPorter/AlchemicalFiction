@@ -58,6 +58,7 @@ defmodule Features do
     defmacro action(verb, do: block) do
         quote do
             v = unquote(verb)
+            block = unquote(block)
             {type, id} = register_action(v)
             build_action(type, id, v) do
                 unquote(block)
@@ -67,15 +68,14 @@ defmodule Features do
 
     defmacro build_action(type, id, verb, do: block) do
         quote do
-            def handle_call(
-                {t, i, v} = {unquote(type), unquote(id), unquote(verb)},
-                actor, state) do
-                    var!(feature_state) = Map.get(state, {:features,t,i})
-                    var!(action_reply) = nil
-                    unquote(block)
-                    new_state = Map.put(state,{:features,t,i},var!(feature_state))
-                    {:reply, var!(action_reply), new_state}
-                end
+            @action {unquote(type), unquote(id), unquote(verb)}
+            def handle_call({t,i,v} = @action, actor, state) do
+                var!(feature_state) = Map.get(state, {:features,t,i})
+                var!(action_reply) = nil
+                unquote(block)
+                new_state = Map.put(state,{:features,t,i},var!(feature_state))
+                {:reply, var!(action_reply), new_state}
+            end
         end
     end
 end
