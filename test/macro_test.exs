@@ -64,4 +64,22 @@ defmodule MacroTests do
         {:reply, {:move, Test}, _} = Test.handle_call({:door, :N, :use}, self, %{})
         {:reply, {:see, "It's red."}, _} = Test.handle_call({:door, :N, :examine}, self, %{})
     end
+
+    test "A feature with initialization" do
+        defmodule Test do
+            use Features
+
+            feature :door, :N, "an exit to the north" do
+                Features.setup do
+                    IO.puts("Initializing…")
+                    set_state(:state, :closed)
+                end
+            end
+        end
+        
+        res = Test.init_features(%{})
+        %{:state => :closed} = Map.get(res, {:features, :door, :N})
+    end
+
+    
 end

@@ -3,6 +3,8 @@ defmodule Features do
         quote do
             import unquote(__MODULE__)
             Module.register_attribute(__MODULE__, :features, accumulate: false)
+            Module.register_attribute(__MODULE__, :initializers, accumulate: true)
+            Module.register_attribute(__MODULE__, :current_feature, [])
             @features %{}
             @before_compile {unquote(__MODULE__), :__before_feature__}
         end
@@ -11,12 +13,20 @@ defmodule Features do
     defmacro __before_feature__(_env) do
         quote do
             def features(), do: @features
+
+            defp initialize(state, nil), do: state #fallthrough just in case there are no inits
+
+            def init_features(state) do
+                inits = @initializers
+                List.foldl(inits, state, fn(init, acc) ->
+                    initialize(acc, init)
+                end)
+            end
         end
     end
 
     defmacro feature(type, id, caption, do: block) do
         quote do
-            Module.register_attribute(__MODULE__, :current_feature, [])
             @current_feature {unquote(type), unquote(id)}
             @features Map.put(@features, @current_feature, [])
             def feature({unquote(type), unquote(id)}) do
@@ -76,6 +86,18 @@ defmodule Features do
                 new_state = Map.put(state,{:features,t,i},var!(feature_state))
                 {:reply, var!(action_reply), new_state}
             end
+        end
+    end
+
+    defmacro setup(do: block) do
+        quote do
+            defp initialize(state, {type,id} = @current_feature) do
+                fstate = Map.get(state, {:features,type,id})
+                var!(feature_state) = fstate || %{}
+                unquote(block)
+                Map.put(state, {:features,type,id}, var!(feature_state))
+            end
+            @initializers @current_feature
         end
     end
 end

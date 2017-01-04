@@ -55,7 +55,7 @@ defmodule Story do
                 end
 
                 def init([]) do
-                    {:ok, %{}}
+                    {:ok, init_features(%{})}
                 end
 
             end
