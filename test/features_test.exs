@@ -1,4 +1,4 @@
-defmodule MacroTests do
+defmodule FeatureTests do
     use ExUnit.Case
 
     test "action building" do
@@ -81,5 +81,27 @@ defmodule MacroTests do
         %{:state => :closed} = Map.get(res, {:features, :door, :N})
     end
 
+    test "Checking a feature's state'" do
+        defmodule Test do
+            use Features
+
+            feature :door, :N, "an exit to the north" do
+                Features.setup do
+                    set_state(:state, :closed)
+                end
+                action :examine do
+                    state = get_state(:state)
+                    case state do
+                        :closed -> reply({:see, "It's closed."})
+                        :open -> reply({:see, "It's open."})
+                    end
+                end
+            end
+        end
+        
+        state = Test.init_features(%{})
+        %{:state => :closed} = Map.get(state, {:features, :door, :N})
+        {:reply, {:see, "It's closed."}, next} = Test.handle_call({:door, :N, :examine}, self(), state)
+    end
     
 end

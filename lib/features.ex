@@ -68,11 +68,8 @@ defmodule Features do
     defmacro action(verb, do: block) do
         quote do
             v = unquote(verb)
-            block = unquote(block)
             {type, id} = register_action(v)
-            build_action(type, id, v) do
-                unquote(block)
-            end
+            build_action(type, id, v, do: unquote(block))
         end
     end
 
