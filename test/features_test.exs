@@ -91,10 +91,11 @@ defmodule FeatureTests do
                 end
                 action :examine do
                     state = get_state(:state)
-                    case state do
-                        :closed -> reply({:see, "It's closed."})
-                        :open -> reply({:see, "It's open."})
+                    msg = case state do
+                        :closed -> {:see, "It's closed."}
+                        :open -> {:see, "It's open."}
                     end
+                    reply(msg)
                 end
             end
         end
@@ -103,5 +104,4 @@ defmodule FeatureTests do
         %{:state => :closed} = Map.get(state, {:features, :door, :N})
         {:reply, {:see, "It's closed."}, next} = Test.handle_call({:door, :N, :examine}, self(), state)
     end
-    
 end

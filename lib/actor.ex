@@ -5,6 +5,10 @@ defmodule Actor do
         GenServer.start_link(__MODULE__, {%{name: name}, spawn_point}, [])
     end
 
+    def get_state(pid) do
+        
+    end
+
     def init({%{name: name}, spawn_point}) do
         {:ok, {%{name: name, inventory: []}, spawn_point}}
     end
