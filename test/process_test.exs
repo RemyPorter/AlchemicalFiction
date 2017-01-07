@@ -11,6 +11,5 @@ defmodule ProcessTest do
         name = {:via, Registry, {Registry.GameMacros, GameMacros.ASimpleScene}}
         GenServer.call(name,
             {:door, :simple, :use})
-        assert(true)
     end
 end
