@@ -50,7 +50,6 @@ defmodule Story do
 
                 def start_link(root) do
                     name = {:via, Registry, {Module.concat(Registry, root), __MODULE__}}
-                    IO.puts("#{inspect(name)}")
                     GenServer.start_link(__MODULE__, [], [name: name])
                 end
 

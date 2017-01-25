@@ -78,7 +78,10 @@ defmodule Features do
             @action {unquote(type), unquote(id), unquote(verb)}
             def handle_call({t,i,v} = @action, actor, state) do
                 var!(feature_state) = Map.get(state, {:features,t,i})
-                var!(actor_state) = Actor.get_state(actor)
+                var!(actor_state) = case actor do
+                    nil -> %{}
+                    _ -> Actor.get_state(actor)
+                end
                 var!(action_reply) = nil
                 unquote(block)
                 new_state = Map.put(state,{:features,t,i},var!(feature_state))
