@@ -11,12 +11,12 @@ defmodule TestElements do
     end
 
     test "can make a choice" do
-        {:reply, {:move, Test}, _} = Test.handle_call({:choice, :page52, :choose}, self, %{})
+        {:reply, {:move, Test}, _} = Test.handle_call({{:choice, :page52, :choose}, nil}, nil, %{})
     end
 
     test "can flip a switch" do
         state = Test.init_features(%{})
-        {:reply, :toggled, new_state} = Test.handle_call({:switch, :lights, :toggle}, self, state)
+        {:reply, :toggled, new_state} = Test.handle_call({{:switch, :lights, :toggle}, nil}, nil, state)
         %{{:features, :switch, :lights} => %{state: true}} = new_state
     end
 end

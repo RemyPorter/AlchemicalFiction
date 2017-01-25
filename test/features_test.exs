@@ -14,8 +14,8 @@ defmodule FeatureTests do
             end
         end
 
-        {:reply, :works, _} = Test.handle_call({:foo, :bar, :goo}, nil, %{}) 
-        {:reply, :also_works, _} = Test.handle_call({:other, :bar, :goo}, nil, %{}) 
+        {:reply, :works, _} = Test.handle_call({{:foo, :bar, :goo}, nil}, self, %{}) 
+        {:reply, :also_works, _} = Test.handle_call({{:other, :bar, :goo}, nil}, self, %{}) 
     end
     
     test "actual action" do
@@ -31,8 +31,8 @@ defmodule FeatureTests do
             end
         end
 
-        {:reply, :works, _} = Test.handle_call({:foo, :bar, :goo}, nil, %{})
-        {:reply, :also_works, _} = Test.handle_call({:foo, :bar, :doo}, nil, %{})
+        {:reply, :works, _} = Test.handle_call({{:foo, :bar, :goo}, nil}, self(), %{})
+        {:reply, :also_works, _} = Test.handle_call({{:foo, :bar, :doo}, nil}, self(), %{})
     end
 
     test "A feature with one action" do
@@ -45,7 +45,7 @@ defmodule FeatureTests do
                 end
             end
         end
-        {:reply, {:move, Test}, _} = Test.handle_call({:door, :N, :use}, nil, %{})
+        {:reply, {:move, Test}, _} = Test.handle_call({{:door, :N, :use}, nil}, self(), %{})
     end
 
     test "A feature with multiple actions" do
@@ -61,8 +61,8 @@ defmodule FeatureTests do
                 end
             end
         end
-        {:reply, {:move, Test}, _} = Test.handle_call({:door, :N, :use}, nil, %{})
-        {:reply, {:see, "It's red."}, _} = Test.handle_call({:door, :N, :examine}, nil, %{})
+        {:reply, {:move, Test}, _} = Test.handle_call({{:door, :N, :use}, nil}, self(), %{})
+        {:reply, {:see, "It's red."}, _} = Test.handle_call({{:door, :N, :examine}, nil}, self(), %{})
     end
 
     test "A feature with initialization" do
@@ -102,6 +102,6 @@ defmodule FeatureTests do
         
         state = Test.init_features(%{})
         %{:state => :closed} = Map.get(state, {:features, :door, :N})
-        {:reply, {:see, "It's closed."}, next} = Test.handle_call({:door, :N, :examine}, nil, state)
+        {:reply, {:see, "It's closed."}, next} = Test.handle_call({{:door, :N, :examine}, nil}, self(), state)
     end
 end

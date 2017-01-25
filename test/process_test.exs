@@ -10,6 +10,6 @@ defmodule ProcessTest do
     test "can send a message to a scene" do
         name = {:via, Registry, {Registry.GameMacros, GameMacros.ASimpleScene}}
         GenServer.call(name,
-            {:door, :simple, :use})
+            {{:door, :simple, :use}, nil})
     end
 end

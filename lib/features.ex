@@ -22,6 +22,14 @@ defmodule Features do
                     initialize(acc, init)
                 end)
             end
+
+            def handle_call(:features, _, state) do
+                {:reply, features(), state}
+            end
+
+            def get_features(scene) do
+                GenServer.call(scene, :features)
+            end
         end
     end
 
@@ -76,7 +84,7 @@ defmodule Features do
     defmacro build_action(type, id, verb, do: block) do
         quote do
             @action {unquote(type), unquote(id), unquote(verb)}
-            def handle_call({t,i,v} = @action, actor, state) do
+            def handle_call({{t,i,v}, actor} = {@action, pid}, _, state) do
                 var!(feature_state) = Map.get(state, {:features,t,i})
                 var!(actor_state) = case actor do
                     nil -> %{}
